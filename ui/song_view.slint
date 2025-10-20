@@ -1,0 +1,107 @@
+import { VerticalBox, Button } from "std-widgets.slint";
+
+export struct UIChord {
+    name: string,
+    lyric_words: [string],
+    beats: int,
+    lyric_word_count: int,
+}
+export struct UIMeasure {
+    chords: [UIChord],
+}
+
+export component SongView inherits VerticalLayout {
+    in-out property <string> song_title;
+    in-out property <[UIMeasure]> measures;
+    in-out property <string> artist;
+    in-out property <int> min_chord_width;  // default fallback 200
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 12px;
+
+        Text { text: song_title; font-size: 22px; font-weight: 700; }
+        Text { text: "By " + artist; font-size: 16px; }
+        Rectangle { border-width: 1px; border-color: #ccc; height: 2px; }
+
+        VerticalLayout {
+            spacing: 8px;
+
+            for measure in measures:
+                HorizontalLayout {
+                    alignment: start;
+
+                    for chord in measure.chords:
+                        Rectangle {
+                            border-color: white;
+                            border-width: 1px;
+                            width: (root.min_chord_width * 12px * chord.beats) + 2px;
+
+                            VerticalLayout {
+                                padding: 4px;
+                                min-width: root.min_chord_width * 12px * chord.beats;
+                                alignment: stretch;
+                                spacing: 4px;
+
+                                // Chord name
+                                Text { 
+                                    text: chord.name; 
+                                    font-size: 18px;
+                                    width: root.min_chord_width * 12px * chord.beats;
+                                    horizontal-alignment: left;
+                                }
+
+                                // Chord lyric split into words
+                                HorizontalLayout {
+                                    spacing: 0px;
+                                    for word in chord.lyric-words:
+                                        Rectangle {
+                                            width: (root.min_chord_width * 12px * chord.beats) / chord.lyric_word_count;
+                                            Text {
+                                                text: word;
+                                                font-size: 18px;
+                                                horizontal-alignment: left;
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                }
+        }
+    }
+}
+
+
+export component MainWindow inherits Window {
+    title: song_title;
+    callback open-file;
+
+    // properties on MainWindow that we will set from Rust
+    in-out property <string> song_title: "No song loaded";
+    in-out property <string> file_path: "";
+    in-out property <[UIMeasure]> measures: [];   // model to hold measures
+    in-out property <string> artist: "";
+    in-out property <int> min_chord_width: 200;
+
+    VerticalLayout {
+        spacing: 20px;
+        padding: 20px;
+
+        Text { text: "Select a file to open:"; }
+
+        Button {
+            text: "Open File";
+            clicked => { root.open-file(); }
+        }
+
+        Text { text <=> file_path; }
+
+        // Bind the SongView's properties to MainWindow properties
+        SongView {
+            song_title <=> root.song_title;
+            measures <=> root.measures;
+            artist <=> root.artist;
+            min_chord_width <=> root.min_chord_width;
+        }
+    }
+}
