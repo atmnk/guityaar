@@ -20,61 +20,72 @@ export component SongView inherits VerticalLayout {
         padding: 16px;
         spacing: 12px;
 
-        Text { text: song_title; font-size: 22px; font-weight: 700; }
-        Text { text: "By " + artist; font-size: 16px; }
-        Rectangle { border-width: 1px; border-color: #ccc; height: 2px; }
+        Text {
+            text: song_title;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        Text {
+            text: "By " + artist;
+            font-size: 16px;
+        }
+
+        Rectangle {
+            border-width: 1px;
+            border-color: #ccc;
+            height: 2px;
+        }
 
         VerticalLayout {
             spacing: 8px;
 
-            for measure in measures:
-                HorizontalLayout {
-                    alignment: start;
+            for measure in measures: HorizontalLayout {
+                alignment: start;
 
-                    for chord in measure.chords:
-                        Rectangle {
-                            border-color: white;
-                            border-width: 1px;
-                            width: (root.min_chord_width * 12px * chord.beats) + 2px;
+                for chord in measure.chords: Rectangle {
+                    border-color: white;
+                    border-width: 1px;
+                    width: (root.min_chord_width * 12px * chord.beats) + 2px;
 
-                            VerticalLayout {
-                                padding: 4px;
-                                min-width: root.min_chord_width * 12px * chord.beats;
-                                alignment: stretch;
-                                spacing: 4px;
+                    VerticalLayout {
+                        padding: 4px;
+                        min-width: root.min_chord_width * 12px * chord.beats;
+                        alignment: stretch;
+                        spacing: 4px;
 
-                                // Chord name
-                                Text { 
-                                    text: chord.name; 
-                                    font-size: 18px;
-                                    width: root.min_chord_width * 12px * chord.beats;
-                                    horizontal-alignment: left;
-                                }
+                        // Chord name
+                                Text {
+                            text: chord.name;
+                            font-size: 18px;
+                            width: root.min_chord_width * 12px * chord.beats;
+                            horizontal-alignment: left;
+                        }
 
-                                // Chord lyric split into words
+                        // Chord lyric split into words
                                 HorizontalLayout {
-                                    spacing: 0px;
-                                    for word in chord.lyric-words:
-                                        Rectangle {
-                                            width: (root.min_chord_width * 12px * chord.beats) / chord.lyric_word_count;
-                                            Text {
-                                                text: word;
-                                                font-size: 18px;
-                                                horizontal-alignment: left;
-                                            }
-                                        }
+                            spacing: 0px;
+                            for word in chord.lyric-words: Rectangle {
+                                width: (root.min_chord_width * 12px * chord.beats) / chord.lyric_word_count;
+                                Text {
+                                    text: word;
+                                    font-size: 18px;
+                                    horizontal-alignment: left;
                                 }
                             }
                         }
+                    }
                 }
+            }
         }
     }
 }
 
-
 export component MainWindow inherits Window {
     title: song_title;
     callback open-file;
+    callback request-increase-value();
+    callback request-decrease-value();
 
     // properties on MainWindow that we will set from Rust
     in-out property <string> song_title: "No song loaded";
@@ -82,19 +93,45 @@ export component MainWindow inherits Window {
     in-out property <[UIMeasure]> measures: [];   // model to hold measures
     in-out property <string> artist: "";
     in-out property <int> min_chord_width: 200;
+    in-out property <int> capo;
 
     VerticalLayout {
         spacing: 20px;
         padding: 20px;
 
-        Text { text: "Select a file to open:"; }
+        Text {
+            text: "Select a file to open:";
+        }
 
         Button {
             text: "Open File";
-            clicked => { root.open-file(); }
+            clicked => {
+                root.open-file();
+            }
         }
 
-        Text { text <=> file_path; }
+        Text {
+            text <=> file_path;
+        }
+
+        HorizontalLayout {
+            Button {
+                text: "+";
+                clicked => {
+                    root.request-increase-value();
+                }
+            }
+            Button {
+                text: "-";
+                clicked => {
+                    root.request-decrease-value();
+                }
+            }
+        }
+
+        Text {
+            text: "Capo: " + capo;
+        }
 
         // Bind the SongView's properties to MainWindow properties
         SongView {

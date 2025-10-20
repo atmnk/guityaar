@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use crate::utils::lyric_to_word;
+use crate::utils::{get_transposed_chord, lyric_to_word};
 use slint::{ModelRc, VecModel};
 use std::rc::Rc;
 slint::include_modules!();
@@ -39,29 +39,29 @@ pub struct Chord {
     pub lyric: Option<String>,
 }
 
-fn chord_to_ui_chord(chord: &Chord) -> UIChord {
+fn chord_to_ui_chord(chord: &Chord,capo:i32) -> UIChord {
     let words = lyric_to_word(&chord.lyric);
 
     UIChord {
-        name: chord.name.clone().into(),
+        name: get_transposed_chord(&chord.name, capo as isize).clone().into(),
 
         lyric_words: ModelRc::from(Rc::new(VecModel::from(words.clone()))),
         beats: chord.beats,
         lyric_word_count: words.len() as i32,
     }
 }
-fn measure_to_ui_measure(measure: &Measure) -> UIMeasure {
-    let chords_vec: Vec<UIChord> = measure.chords.iter().map(chord_to_ui_chord).collect();
+fn measure_to_ui_measure(measure: &Measure,capo:i32) -> UIMeasure {
+    let chords_vec: Vec<UIChord> = measure.chords.iter().map(|ch|chord_to_ui_chord(ch,capo)).collect();
     UIMeasure {
         chords: ModelRc::from(Rc::new(VecModel::from(chords_vec))),
     }
 }
 
-pub fn song_to_measures_model(song: &Song) -> ModelRc<UIMeasure> {
+pub fn song_to_measures_model(song: &Song, capo : i32) -> ModelRc<UIMeasure> {
     let measures_vec: Vec<UIMeasure> = song
         .sections
         .iter()
-        .flat_map(|section| section.measures.iter().map(measure_to_ui_measure))
+        .flat_map(|section| section.measures.iter().map(|m|measure_to_ui_measure(m,capo)))
         .collect();
     ModelRc::new(VecModel::from(measures_vec))
 }
