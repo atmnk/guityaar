@@ -1798,6 +1798,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "guityaar"
+version = "0.1.0"
+dependencies = [
+ "fontdb",
+ "fontdue",
+ "rfd",
+ "serde",
+ "serde_json",
+ "slint",
+ "slint-build",
+ "unicode-general-category",
+ "unicode-segmentation",
+ "unicode-width",
+]
+
+[[package]]
 name = "half"
 version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4097,22 +4113,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "spin_on",
-]
-
-[[package]]
-name = "slint-rust-template"
-version = "0.1.0"
-dependencies = [
- "fontdb",
- "fontdue",
- "rfd",
- "serde",
- "serde_json",
- "slint",
- "slint-build",
- "unicode-general-category",
- "unicode-segmentation",
- "unicode-width",
 ]
 
 [[package]]
