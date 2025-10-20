@@ -60,7 +60,6 @@ fn reset_app_path(app: MainWindow, path_str: String) {
     };
     let measures_model = song_to_measures_model(&song,app.get_capo());
     let min_width = compute_min_chord_width(&song);
-    println!("Computed min chord width: {}", min_width);
     app.set_song_title(song.title.clone().into());
     app.set_artist(
         song.artist
